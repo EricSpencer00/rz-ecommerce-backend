@@ -1,0 +1,199 @@
+// rz-ecommerce-backend — Resilient implementation
+//
+// Demonstrates: contracts (requires/ensures), live blocks, typed failures,
+// Option/Result, match patterns, and struct-based domain modeling.
+//
+// This is the BUSINESS LOGIC layer. In production you'd call these verified
+// functions from a Rust/C HTTP host that handles networking and persistence.
+
+// ============================================================
+// Domain types
+// ============================================================
+
+struct Product {
+    int id,
+    string name,
+    int price_cents,
+    int stock,
+}
+
+struct CartItem {
+    int product_id,
+    int quantity,
+    int unit_price,
+}
+
+struct Order {
+    int id,
+    int total_cents,
+    string status,
+}
+
+// ============================================================
+// Inventory — contracts guarantee correctness
+// ============================================================
+
+fn create_product(int id, string name, int price_cents, int stock) -> Product
+    requires id > 0
+    requires price_cents > 0
+    requires stock >= 0
+{
+    return new Product { id: id, name: name, price_cents: price_cents, stock: stock };
+}
+
+fn decrement_stock(Product p, int qty) -> Product
+    requires qty > 0
+    requires qty <= p.stock
+    ensures result.stock >= 0
+{
+    return new Product {
+        id: p.id,
+        name: p.name,
+        price_cents: p.price_cents,
+        stock: p.stock - qty,
+    };
+}
+
+fn restock(Product p, int qty) -> Product
+    requires qty > 0
+    ensures result.stock > p.stock
+{
+    return new Product {
+        id: p.id,
+        name: p.name,
+        price_cents: p.price_cents,
+        stock: p.stock + qty,
+    };
+}
+
+// ============================================================
+// Cart operations
+// ============================================================
+
+fn make_cart_item(int product_id, int quantity, int unit_price) -> CartItem
+    requires quantity > 0
+    requires unit_price > 0
+{
+    return new CartItem {
+        product_id: product_id,
+        quantity: quantity,
+        unit_price: unit_price,
+    };
+}
+
+fn cart_line_total(CartItem item) -> int
+    ensures result > 0
+{
+    return item.quantity * item.unit_price;
+}
+
+fn calculate_total(int a, int b) -> int
+    requires a >= 0
+    requires b >= 0
+    ensures result >= 0
+{
+    return a + b;
+}
+
+// ============================================================
+// Order placement — live block for fault tolerance
+// ============================================================
+
+fn make_order(int order_id, int total_cents) -> Order
+    requires order_id > 0
+    requires total_cents > 0
+{
+    return new Order {
+        id: order_id,
+        total_cents: total_cents,
+        status: "confirmed",
+    };
+}
+
+fn validate_order_total(int total, int expected)
+    requires total > 0
+    requires expected > 0
+{
+    assert(total == expected, "Order total mismatch: got " + total + " expected " + expected);
+}
+
+// ============================================================
+// Search — Option for nullable results
+// ============================================================
+
+fn find_product_by_name(string target, string name1, int id1, string name2, int id2) -> int {
+    if target == name1 { return Some(id1); }
+    if target == name2 { return Some(id2); }
+    return None;
+}
+
+// ============================================================
+// Demo: full checkout flow
+// ============================================================
+
+fn main() {
+    println("=== Resilient Ecommerce Backend ===");
+    println("");
+
+    // Create product catalog (contracts enforce valid data at construction)
+    let laptop = create_product(1, "Laptop", 99900, 10);
+    let mouse = create_product(2, "Mouse", 2500, 50);
+    println("Product: " + laptop.name + " $" + laptop.price_cents + " (stock: " + laptop.stock + ")");
+    println("Product: " + mouse.name + " $" + mouse.price_cents + " (stock: " + mouse.stock + ")");
+    println("");
+
+    // Search with Option
+    let found = find_product_by_name("Laptop", laptop.name, laptop.id, mouse.name, mouse.id);
+    match found {
+        Some(id) => println("Search 'Laptop': found product #" + id),
+        None => println("Search: not found"),
+    }
+    let missing = find_product_by_name("Tablet", laptop.name, laptop.id, mouse.name, mouse.id);
+    match missing {
+        Some(id) => println("Search 'Tablet': found #" + id),
+        None => println("Search 'Tablet': not found"),
+    }
+    println("");
+
+    // Build cart (contracts enforce quantity > 0, price > 0)
+    println("=== Cart Operations ===");
+    let item1 = make_cart_item(laptop.id, 1, laptop.price_cents);
+    let item2 = make_cart_item(mouse.id, 2, mouse.price_cents);
+    let t1 = cart_line_total(item1);
+    let t2 = cart_line_total(item2);
+    let total = calculate_total(t1, t2);
+    println("Cart: 1x Laptop = $" + t1);
+    println("Cart: 2x Mouse  = $" + t2);
+    println("Cart total: $" + total);
+    println("");
+
+    // Place order with self-healing live block
+    // If validate_order_total fails (e.g. due to a transient computation error),
+    // the live block retries automatically with state rollback.
+    println("=== Placing Order (with live block fault tolerance) ===");
+    live within 500ms {
+        validate_order_total(total, 104900);
+        let order = make_order(1, total);
+        println("Order #" + order.id + " " + order.status + " — total $" + order.total_cents);
+    }
+
+    // Decrement stock — contract proves we can't go negative
+    let laptop = decrement_stock(laptop, 1);
+    let mouse = decrement_stock(mouse, 2);
+    println("Stock updated — Laptop: " + laptop.stock + ", Mouse: " + mouse.stock);
+    println("");
+
+    // Restock — contract proves stock always increases
+    println("=== Restock ===");
+    let mouse = restock(mouse, 25);
+    println("Mouse restocked to: " + mouse.stock);
+    println("");
+
+    // Demonstrate contract violation detection:
+    // Uncommenting this would be caught at compile time with Z3:
+    // let bad = decrement_stock(laptop, 100);  // REJECTED: requires qty <= p.stock
+
+    println("All operations completed with verified correctness.");
+}
+
+main();

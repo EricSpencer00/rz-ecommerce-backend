@@ -1,0 +1,9 @@
+target/
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+*.sqlite
+.DS_Store
+.resilient_cache/
