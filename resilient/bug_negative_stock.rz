@@ -1,0 +1,31 @@
+// BUG DEMO: AI generates code that oversells inventory
+// The contract catches it BEFORE this ever runs in production.
+
+struct Product {
+    int id,
+    string name,
+    int price_cents,
+    int stock,
+}
+
+fn decrement_stock(Product p, int qty) -> Product
+    requires qty > 0
+    requires qty <= p.stock
+    ensures result.stock >= 0
+{
+    return new Product {
+        id: p.id,
+        name: p.name,
+        price_cents: p.price_cents,
+        stock: p.stock - qty,
+    };
+}
+
+fn main() {
+    let laptop = new Product { id: 1, name: "Laptop", price_cents: 99900, stock: 3 };
+    // AI generated: sell 5 laptops when only 3 in stock
+    let updated = decrement_stock(laptop, 5);
+    println("Stock: " + updated.stock);
+}
+
+main();

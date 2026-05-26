@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Code Fearlessly — Resilient Language Demo</title>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface2: #1a1a26;
+      --border: #2a2a3a;
+      --text: #e0e0e8;
+      --text-dim: #8888a0;
+      --accent: #7c5bf0;
+      --accent-glow: #7c5bf020;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --cyan: #22d3ee;
+      --orange: #fb923c;
+      --mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      --sans: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* --- Hero --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 30% 20%, #7c5bf015 0%, transparent 70%),
+        radial-gradient(ellipse 500px 300px at 70% 60%, #22d3ee08 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      background: var(--surface);
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    h1 .gradient {
+      background: linear-gradient(135deg, var(--accent), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--text-dim);
+      text-align: center;
+      max-width: 640px;
+      margin-bottom: 3rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+      font-family: var(--sans);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #6a4bd8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px #7c5bf040;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    /* --- Scroll indicator --- */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    .scroll-hint svg {
+      width: 20px; height: 20px;
+      stroke: var(--text-dim);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* --- Sections --- */
+    section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-desc {
+      color: var(--text-dim);
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    /* --- Terminal --- */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .terminal-dots span {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .terminal-dots span:nth-child(1) { background: #ff5f57; }
+    .terminal-dots span:nth-child(2) { background: #febc2e; }
+    .terminal-dots span:nth-child(3) { background: #28c840; }
+
+    .terminal-title {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+    }
+
+    .terminal-body {
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+    }
+
+    .terminal-body .prompt { color: var(--green); }
+    .terminal-body .cmd { color: var(--text); }
+    .terminal-body .comment { color: var(--text-dim); }
+    .terminal-body .error { color: var(--red); }
+    .terminal-body .warning { color: var(--yellow); }
+    .terminal-body .success { color: var(--green); }
+    .terminal-body .info { color: var(--cyan); }
+    .terminal-body .accent { color: var(--accent); }
+    .terminal-body .orange { color: var(--orange); }
+    .terminal-body .dim { color: var(--text-dim); }
+    .terminal-body .line { margin-bottom: 0; }
+    .terminal-body .blank { height: 0.5em; }
+
+    /* --- Split comparison --- */
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison { grid-template-columns: 1fr; }
+    }
+
+    .comparison .terminal { margin-bottom: 0; }
+
+    .label-bad {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #f8717120;
+      color: var(--red);
+      margin-bottom: 0.75rem;
+    }
+
+    .label-good {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #4ade8020;
+      color: var(--green);
+      margin-bottom: 0.75rem;
+    }
+
+    /* --- Feature grid --- */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent);
+    }
+
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* --- Animated demo --- */
+    .demo-container {
+      position: relative;
+    }
+
+    .demo-step {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
+    }
+
+    .demo-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- Typing animation --- */
+    .typing-line {
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid var(--accent);
+      animation: typing 2s steps(40) forwards, blink 0.7s step-end 3;
+      width: 0;
+    }
+
+    .typing-line.active {
+      width: 100%;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    /* --- Code blocks --- */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-filename {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    .code-lang {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .lang-rz { background: #7c5bf020; color: var(--accent); }
+    .lang-py { background: #fbbf2420; color: var(--yellow); }
+    .lang-rs { background: #fb923c20; color: var(--orange); }
+
+    .code-body {
+      padding: 1rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .code-body .kw { color: var(--accent); }
+    .code-body .fn { color: var(--cyan); }
+    .code-body .str { color: var(--green); }
+    .code-body .num { color: var(--orange); }
+    .code-body .cmt { color: var(--text-dim); }
+    .code-body .type { color: var(--yellow); }
+    .code-body .op { color: var(--text-dim); }
+
+    /* --- Comparison table --- */
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .comp-table th, .comp-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comp-table th {
+      color: var(--text-dim);
+      font-weight: 500;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comp-table td:first-child {
+      color: var(--text-dim);
+    }
+
+    .check { color: var(--green); }
+    .cross { color: var(--red); }
+    .partial { color: var(--yellow); }
+
+    /* --- Timeline --- */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      margin-top: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 20px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .timeline-step {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.5rem 0;
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      z-index: 1;
+      transition: border-color 0.3s;
+    }
+
+    .timeline-step:hover .timeline-dot {
+      border-color: var(--accent);
+    }
+
+    .timeline-content h3 {
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .timeline-content p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* --- Footer --- */
+    footer {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* --- Scroll animations --- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- Scenario cards --- */
+    .scenario {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .scenario-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .scenario-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .scenario-desc {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Resilient Language
+  </div>
+  <h1>Vibe code fearlessly.<br><span class="gradient">The compiler has your back.</span></h1>
+  <p class="hero-sub">
+    AI writes code fast. Resilient proves it correct. Z3-verified contracts catch
+    every bug your copilot introduces — at compile time, not in production.
+  </p>
+  <div class="hero-cta">
+    <a href="#demo" class="btn btn-primary">See it catch bugs &darr;</a>
+    <a href="https://github.com/EricSpencer00/Resilient" class="btn btn-ghost">GitHub &rarr;</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to see the demo</span>
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</div>
+
+<!-- ============ THE PROBLEM ============ -->
+<section id="problem" class="reveal">
+  <div class="section-label">The problem</div>
+  <h2>AI writes bugs. Every language ships them differently.</h2>
+  <p class="section-desc">
+    When you vibe code an ecommerce backend, the AI will eventually generate a function
+    that sells more inventory than exists, sets a price to zero, or calculates the wrong total.
+    What happens next depends on your language.
+  </p>
+
+  <div class="comparison">
+    <div>
+      <span class="label-bad">Python &mdash; ships the bug</span>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dots"><span></span><span></span><span></span></div>
+          <span class="terminal-title">python main.py</span>
+        </div>
+        <div class="terminal-body">
+          <div class="line"><span class="comment"># AI wrote: sell 5 laptops (only 3 in stock)</span></div>
+          <div class="line"><span class="cmd">product["stock"] -= quantity</span></div>
+          <div class="line"><span class="comment"># stock is now -2. No error.</span></div>
+          <div class="line"><span class="comment"># Customer is charged. Warehouse can't ship.</span></div>
+          <div class="blank"></div>
+          <div class="line"><span class="prompt">$</span> <span class="cmd">curl POST /orders</span></div>
+          <div class="line"><span class="success">{"status": "confirmed", "total": 4995.00}</span></div>
+          <div class="line"><span class="comment"># Looks fine. Bug ships to production.</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <span class="label-good">Resilient &mdash; catches it</span>
+      <div class="terminal">
+        <div class="terminal-bar">
+          <div class="terminal-dots"><span></span><span></span><span></span></div>
+          <span class="terminal-title">rz main.rz</span>
+        </div>
+        <div class="terminal-body">
+          <div class="line"><span class="comment">// AI wrote the same bug</span></div>
+          <div class="line"><span class="cmd">let updated = decrement_stock(laptop, 5);</span></div>
+          <div class="blank"></div>
+          <div class="line"><span class="error">Error: Contract violation in fn decrement_stock:</span></div>
+          <div class="line"><span class="error">&nbsp; requires qty &lt;= p.stock failed</span></div>
+          <div class="blank"></div>
+          <div class="line"><span class="warning">blame: `decrement_stock` has `requires` on</span></div>
+          <div class="line"><span class="warning">&nbsp; [p, qty]; root caller(s): [main]</span></div>
+          <div class="blank"></div>
+          <div class="line"><span class="comment">// Bug caught. Code never runs.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIVE DEMO ============ -->
+<section id="demo" class="reveal">
+  <div class="section-label">Live demo</div>
+  <h2>Three bugs. Three catches. Zero shipped.</h2>
+  <p class="section-desc">
+    Real compiler output from the Resilient ecommerce backend. Every scenario below is a
+    real bug that an AI assistant generated during development.
+  </p>
+
+  <!-- Bug 1: Negative stock -->
+  <div class="scenario reveal">
+    <div class="scenario-header">
+      <div class="scenario-num">1</div>
+      <div class="scenario-title">AI oversells inventory</div>
+    </div>
+    <p class="scenario-desc">
+      The AI generates code to sell 5 laptops when only 3 are in stock.
+      In Python, stock goes to &minus;2. In Resilient, the contract fires.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">bug_negative_stock.rz</span>
+        <span class="code-lang lang-rz">Resilient</span>
+      </div>
+      <div class="code-body">
+<span class="kw">fn</span> <span class="fn">decrement_stock</span>(<span class="type">Product</span> p, <span class="type">int</span> qty) -> <span class="type">Product</span>
+    <span class="kw">requires</span> qty > <span class="num">0</span>
+    <span class="kw">requires</span> qty &lt;= p.stock      <span class="cmt">// &larr; THE SAFETY NET</span>
+    <span class="kw">ensures</span>  result.stock >= <span class="num">0</span>
+{
+    <span class="kw">return new</span> <span class="type">Product</span> { ..., stock: p.stock - qty };
+}
+
+<span class="cmt">// AI-generated call: laptop.stock is 3, qty is 5</span>
+<span class="kw">let</span> updated = <span class="fn">decrement_stock</span>(laptop, <span class="num">5</span>);
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <span class="terminal-title">rz bug_negative_stock.rz</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line"><span class="warning">warning[resilience]: `main` scores 28/100</span></div>
+        <div class="line"><span class="warning">&nbsp; (F — vibe-coded, unverified)</span></div>
+        <div class="blank"></div>
+        <div class="line"><span class="error">Error: Contract violation in fn decrement_stock:</span></div>
+        <div class="line"><span class="error">&nbsp; requires qty &lt;= &lt;expr&gt; failed</span></div>
+        <div class="blank"></div>
+        <div class="line"><span class="orange">blame: `decrement_stock` has `requires` on [p, qty]</span></div>
+        <div class="line"><span class="orange">&nbsp; root caller(s) responsible: [main]</span></div>
+        <div class="line"><span class="orange">&nbsp; (chain: main → decrement_stock)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bug 2: Zero price -->
+  <div class="scenario reveal">
+    <div class="scenario-header">
+      <div class="scenario-num">2</div>
+      <div class="scenario-title">AI sets price to zero</div>
+    </div>
+    <p class="scenario-desc">
+      The AI forgets to pass a price argument, defaulting to 0.
+      In Python, you now sell free laptops. In Resilient, the contract catches it
+      <strong>at compile time</strong> — before the program ever runs.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">bug_zero_price.rz</span>
+        <span class="code-lang lang-rz">Resilient</span>
+      </div>
+      <div class="code-body">
+<span class="kw">fn</span> <span class="fn">create_product</span>(<span class="type">int</span> id, <span class="type">string</span> name, <span class="type">int</span> price_cents, <span class="type">int</span> stock) -> <span class="type">Product</span>
+    <span class="kw">requires</span> price_cents > <span class="num">0</span>   <span class="cmt">// &larr; no free products</span>
+{ ... }
+
+<span class="cmt">// AI forgot the price — passes 0</span>
+<span class="kw">let</span> oops = <span class="fn">create_product</span>(<span class="num">1</span>, <span class="str">"Free Laptop"</span>, <span class="num">0</span>, <span class="num">10</span>);
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <span class="terminal-title">rz bug_zero_price.rz</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line"><span class="error">Type error: Contract violation: call to fn</span></div>
+        <div class="line"><span class="error">&nbsp; create_product would fail `requires` clause</span></div>
+        <div class="line"><span class="error">&nbsp; at compile time</span></div>
+        <div class="blank"></div>
+        <div class="line"><span class="dim">&nbsp; let oops = create_product(1, "Free Laptop", 0, 10);</span></div>
+        <div class="line"><span class="error">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;^</span></div>
+        <div class="blank"></div>
+        <div class="line"><span class="info">// Caught BEFORE the code runs. Z3 proved it invalid.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bug 3: Wrong total -->
+  <div class="scenario reveal">
+    <div class="scenario-header">
+      <div class="scenario-num">3</div>
+      <div class="scenario-title">AI miscalculates order total</div>
+    </div>
+    <p class="scenario-desc">
+      The AI forgets to add one item to the cart total. The <code>live</code> block
+      detects the mismatch, retries 3 times (in case it was a transient fault), then
+      fails with a precise diagnostic showing both values.
+    </p>
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">bug_mismatched_total.rz</span>
+        <span class="code-lang lang-rz">Resilient</span>
+      </div>
+      <div class="code-body">
+<span class="cmt">// AI bug: forgot to add item2's total</span>
+<span class="kw">let</span> wrong_total = t1;  <span class="cmt">// should be t1 + t2</span>
+
+<span class="kw">live</span> {
+    <span class="fn">validate_order_total</span>(wrong_total, <span class="num">2500</span>);
+}
+      </div>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="terminal-dots"><span></span><span></span><span></span></div>
+        <span class="terminal-title">rz bug_mismatched_total.rz</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line"><span class="info">[LIVE BLOCK] Starting execution</span></div>
+        <div class="line"><span class="warning">[LIVE BLOCK] Error detected (attempt 1/3):</span></div>
+        <div class="line"><span class="warning">&nbsp; ASSERTION ERROR: Order total mismatch:</span></div>
+        <div class="line"><span class="warning">&nbsp; got 2000 expected 2500</span></div>
+        <div class="line"><span class="info">[LIVE BLOCK] Restoring environment to last known good state</span></div>
+        <div class="line"><span class="info">[LIVE BLOCK] Retrying (attempt 2/3)</span></div>
+        <div class="line"><span class="warning">[LIVE BLOCK] Error detected (attempt 2/3) ...</span></div>
+        <div class="line"><span class="info">[LIVE BLOCK] Retrying (attempt 3/3)</span></div>
+        <div class="line"><span class="warning">[LIVE BLOCK] Error detected (attempt 3/3) ...</span></div>
+        <div class="line"><span class="error">[LIVE BLOCK] Maximum retry attempts reached</span></div>
+        <div class="blank"></div>
+        <div class="line"><span class="error">Error: Live block failed after 3 attempts:</span></div>
+        <div class="line"><span class="error">&nbsp; Order total mismatch: got 2000 expected 2500</span></div>
+        <div class="line"><span class="error">&nbsp; condition 2000 == 2500 was false</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE HAPPY PATH ============ -->
+<section class="reveal">
+  <div class="section-label">When the code is correct</div>
+  <h2>Verified code runs with confidence.</h2>
+  <p class="section-desc">
+    When the AI writes correct code — or a human fixes the AI's bugs — Resilient
+    verifies the contracts and runs cleanly. The live block confirms fault tolerance.
+  </p>
+
+  <div class="terminal">
+    <div class="terminal-bar">
+      <div class="terminal-dots"><span></span><span></span><span></span></div>
+      <span class="terminal-title">rz main.rz — correct ecommerce backend</span>
+    </div>
+    <div class="terminal-body">
+      <div class="line"><span class="success">=== Resilient Ecommerce Backend ===</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="cmd">Product: Laptop $99900 (stock: 10)</span></div>
+      <div class="line"><span class="cmd">Product: Mouse $2500 (stock: 50)</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="cmd">Search 'Laptop': found product #1</span></div>
+      <div class="line"><span class="cmd">Search 'Tablet': not found</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="success">=== Cart Operations ===</span></div>
+      <div class="line"><span class="cmd">Cart: 1x Laptop = $99900</span></div>
+      <div class="line"><span class="cmd">Cart: 2x Mouse  = $5000</span></div>
+      <div class="line"><span class="cmd">Cart total: $104900</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="success">=== Placing Order (with live block fault tolerance) ===</span></div>
+      <div class="line"><span class="info">[LIVE BLOCK] Starting execution of live block</span></div>
+      <div class="line"><span class="cmd">Order #1 confirmed — total $104900</span></div>
+      <div class="line"><span class="success">[LIVE BLOCK] Successfully executed live block</span></div>
+      <div class="line"><span class="cmd">Stock updated — Laptop: 9, Mouse: 48</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="success">=== Restock ===</span></div>
+      <div class="line"><span class="cmd">Mouse restocked to: 73</span></div>
+      <div class="blank"></div>
+      <div class="line"><span class="success">All operations completed with verified correctness.</span></div>
+      <div class="line"><span class="success">Program executed successfully</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOW ============ -->
+<section class="reveal">
+  <div class="section-label">The workflow</div>
+  <h2>How vibe coding works with Resilient</h2>
+  <p class="section-desc">
+    The loop is simple: write contracts once, then let the AI generate implementations.
+    The compiler tells you if the AI got it wrong.
+  </p>
+
+  <div class="timeline">
+    <div class="timeline-step reveal">
+      <div class="timeline-dot">1</div>
+      <div class="timeline-content">
+        <h3>Write the contract (you, 2 minutes)</h3>
+        <p>Define <code>requires</code> and <code>ensures</code> for your business rules.
+        This is the specification — what must be true, not how to implement it.</p>
+      </div>
+    </div>
+    <div class="timeline-step reveal">
+      <div class="timeline-dot">2</div>
+      <div class="timeline-content">
+        <h3>Vibe code the implementation (AI, 30 seconds)</h3>
+        <p>Tell your AI assistant to implement the function body.
+        It writes the code fast. Maybe it's correct, maybe not.</p>
+      </div>
+    </div>
+    <div class="timeline-step reveal">
+      <div class="timeline-dot">3</div>
+      <div class="timeline-content">
+        <h3>Compile (compiler + Z3, instant)</h3>
+        <p>The Z3 SMT solver checks every contract at compile time.
+        If the AI broke an invariant, you get a precise diagnostic
+        with blame chains pointing to the exact failure.</p>
+      </div>
+    </div>
+    <div class="timeline-step reveal">
+      <div class="timeline-dot">4</div>
+      <div class="timeline-content">
+        <h3>Ship with confidence</h3>
+        <p>Green build = proven correct. The contracts aren't tests that might
+        miss edge cases — they're mathematical proofs that cover every possible input.
+        <code>live</code> blocks handle the rest at runtime.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMPARISON TABLE ============ -->
+<section class="reveal">
+  <div class="section-label">Side by side</div>
+  <h2>How the three implementations compare</h2>
+  <p class="section-desc">
+    Same ecommerce backend. Three languages. Different safety guarantees.
+  </p>
+
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th style="color: var(--accent)">Resilient</th>
+        <th style="color: var(--orange)">Rust</th>
+        <th style="color: var(--yellow)">Python</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Negative stock prevented</td>
+        <td><span class="check">Compile-time proof</span></td>
+        <td><span class="partial">SQL CHECK constraint</span></td>
+        <td><span class="cross">Runtime crash (maybe)</span></td>
+      </tr>
+      <tr>
+        <td>Zero-price product blocked</td>
+        <td><span class="check">Z3 rejects at compile</span></td>
+        <td><span class="partial">SQL CHECK constraint</span></td>
+        <td><span class="partial">Pydantic validation</span></td>
+      </tr>
+      <tr>
+        <td>Order total verified</td>
+        <td><span class="check">Contract + assertion</span></td>
+        <td><span class="cross">Manual test only</span></td>
+        <td><span class="cross">Manual test only</span></td>
+      </tr>
+      <tr>
+        <td>Transient fault recovery</td>
+        <td><span class="check">live {} auto-retry</span></td>
+        <td><span class="cross">Manual retry logic</span></td>
+        <td><span class="cross">Manual retry logic</span></td>
+      </tr>
+      <tr>
+        <td>Blame chain on error</td>
+        <td><span class="check">caller &rarr; callee trace</span></td>
+        <td><span class="partial">Stack trace</span></td>
+        <td><span class="partial">Stack trace</span></td>
+      </tr>
+      <tr>
+        <td>Resilience score</td>
+        <td><span class="check">Per-function grading</span></td>
+        <td><span class="cross">None</span></td>
+        <td><span class="cross">None</span></td>
+      </tr>
+      <tr>
+        <td>HTTP server</td>
+        <td><span class="cross">Not yet (embedded-first)</span></td>
+        <td><span class="check">axum (production-grade)</span></td>
+        <td><span class="check">FastAPI (production-grade)</span></td>
+      </tr>
+      <tr>
+        <td>Database driver</td>
+        <td><span class="cross">Not yet</span></td>
+        <td><span class="check">rusqlite</span></td>
+        <td><span class="check">sqlite3 (stdlib)</span></td>
+      </tr>
+      <tr>
+        <td>Runs on bare metal</td>
+        <td><span class="check">Cortex-M, RISC-V</span></td>
+        <td><span class="check">With #![no_std]</span></td>
+        <td><span class="cross">No</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="reveal">
+  <div class="section-label">Why it matters</div>
+  <h2>Built for the AI-assisted future</h2>
+
+  <div class="features">
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f9ee;</div>
+      <h3>Contracts as specification</h3>
+      <p>Write <code>requires</code>/<code>ensures</code> once. The AI implements,
+      the SMT solver verifies. Humans define <em>what</em>, machines figure out <em>how</em>.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f6e1;&#xfe0f;</div>
+      <h3>Resilience scores</h3>
+      <p>Every function gets a 0–100 resilience grade. The compiler literally tells you
+      "this function is vibe-coded and unverified" — then tells you how to fix it.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f504;</div>
+      <h3>Self-healing live blocks</h3>
+      <p><code>live { }</code> blocks catch transient faults, roll back state, and retry
+      with exponential backoff. Built into the language, not a library.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f50d;</div>
+      <h3>Blame chains</h3>
+      <p>When a contract fails, the compiler traces the violation from the failing function
+      back to the root caller. No guessing which function caused the bug.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f3af;</div>
+      <h3>Typed failure modes</h3>
+      <p>Functions declare <code>fails Timeout, OutOfStock</code> — callers must handle
+      every failure variant. Unhandled errors are compile-time errors, not runtime surprises.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">&#x1f4a1;</div>
+      <h3>Contract inference</h3>
+      <p>The compiler <em>suggests</em> contracts for unverified functions.
+      Start vibe-coding, then harden iteratively — the compiler guides you.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="reveal" style="text-align: center;">
+  <h2>Try it yourself</h2>
+  <p class="section-desc" style="margin: 1rem auto 2rem;">
+    Resilient is open source under MIT. The compiler, runtime, playground, and all
+    440+ test examples are on GitHub.
+  </p>
+  <div class="hero-cta">
+    <a href="https://github.com/EricSpencer00/Resilient" class="btn btn-primary">
+      View on GitHub
+    </a>
+    <a href="https://ericspencer.us/Resilient/playground/" class="btn btn-ghost">
+      Try the Playground
+    </a>
+    <a href="https://github.com/EricSpencer00/rz-ecommerce-backend" class="btn btn-ghost">
+      Source for this demo
+    </a>
+  </div>
+</section>
+
+<footer>
+  <p>
+    Built with <a href="https://github.com/EricSpencer00/Resilient">Resilient</a>
+    by <a href="https://ericspencer.us">Eric Spencer</a>
+  </p>
+</footer>
+
+<script>
+  // Scroll-triggered reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+
+</body>
+</html>

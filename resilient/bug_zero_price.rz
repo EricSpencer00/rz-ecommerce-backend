@@ -1,0 +1,25 @@
+// BUG DEMO: AI forgets to set the price field
+// The contract catches free products before they ship.
+
+struct Product {
+    int id,
+    string name,
+    int price_cents,
+    int stock,
+}
+
+fn create_product(int id, string name, int price_cents, int stock) -> Product
+    requires id > 0
+    requires price_cents > 0
+    requires stock >= 0
+{
+    return new Product { id: id, name: name, price_cents: price_cents, stock: stock };
+}
+
+fn main() {
+    // AI forgot to set the price — passes 0
+    let oops = create_product(1, "Free Laptop", 0, 10);
+    println(oops.name + " costs $" + oops.price_cents);
+}
+
+main();

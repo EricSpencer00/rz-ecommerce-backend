@@ -1,0 +1,39 @@
+// BUG DEMO: AI calculates the order total wrong
+// The live block + assertion catches the mismatch at runtime.
+
+struct CartItem {
+    int product_id,
+    int quantity,
+    int unit_price,
+}
+
+fn cart_line_total(CartItem item) -> int {
+    return item.quantity * item.unit_price;
+}
+
+fn validate_order_total(int total, int expected)
+    requires total > 0
+    requires expected > 0
+{
+    assert(total == expected, "Order total mismatch: got " + total + " expected " + expected);
+}
+
+fn main() {
+    let item1 = new CartItem { product_id: 1, quantity: 2, unit_price: 1000 };
+    let item2 = new CartItem { product_id: 2, quantity: 1, unit_price: 500 };
+    let t1 = cart_line_total(item1);
+    let t2 = cart_line_total(item2);
+
+    // AI bug: forgot to add item2's total
+    let wrong_total = t1;
+
+    // The live block catches this and retries — but the math is still wrong,
+    // so it fails definitively with a clear diagnostic.
+    live {
+        validate_order_total(wrong_total, 2500);
+    }
+
+    println("This line never runs");
+}
+
+main();
